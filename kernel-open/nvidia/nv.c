@@ -2047,7 +2047,8 @@ nvidia_ioctl(
     void *arg_copy = NULL;
     size_t arg_size = 0;
     int arg_cmd;
-
+    printk(KERN_INFO "IOCTL - pid = %d, ioctl(0x%x, 0x%x, 0x%x)\n",
+        current->pid, _IOC_NR(cmd), (unsigned int) i_arg, _IOC_SIZE(cmd));
     nv_printf(NV_DBG_INFO, "NVRM: ioctl(0x%x, 0x%x, 0x%x)\n",
         _IOC_NR(cmd), (unsigned int) i_arg, _IOC_SIZE(cmd));
 
@@ -2148,6 +2149,7 @@ nvidia_ioctl(
 
         case NV_ESC_ATTACH_GPUS_TO_FD:
         {
+	    printk(KERN_INFO "attach to GPUs\n");
             size_t num_arg_gpus = arg_size / sizeof(NvU32);
             size_t i;
 
@@ -2206,6 +2208,7 @@ nvidia_ioctl(
         case NV_ESC_SYS_PARAMS:
         {
             nv_ioctl_sys_params_t *api = arg_copy;
+	    printk(KERN_INFO "sys params\n");
 
             NV_CTL_DEVICE_ONLY(nv);
 
@@ -2231,6 +2234,7 @@ nvidia_ioctl(
 
         case NV_ESC_NUMA_INFO:
         {
+	    printk(KERN_INFO "numa info\n");
             nv_ioctl_numa_info_t *api = arg_copy;
             rmStatus = NV_OK;
 
@@ -2264,6 +2268,7 @@ nvidia_ioctl(
 
         case NV_ESC_SET_NUMA_STATUS:
         {
+	    printk(KERN_INFO "numa status\n");
             nv_ioctl_set_numa_status_t *api = arg_copy;
             rmStatus = NV_OK;
 
@@ -2345,6 +2350,7 @@ unlock:
 
         case NV_ESC_EXPORT_TO_DMABUF_FD:
         {
+	    printk(KERN_INFO "esc export to dmabuf\n");
             nv_ioctl_export_to_dma_buf_fd_t *params = arg_copy;
 
             if (arg_size != sizeof(nv_ioctl_export_to_dma_buf_fd_t))
@@ -2361,6 +2367,8 @@ unlock:
         }
 
         default:
+
+	    printk(KERN_INFO "IOCTL - default\n");
             rmStatus = rm_ioctl(sp, nv, &nvlfp->nvfp, arg_cmd, arg_copy, arg_size);
             status = ((rmStatus == NV_OK) ? 0 : -EINVAL);
             break;

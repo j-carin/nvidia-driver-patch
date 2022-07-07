@@ -46,6 +46,19 @@
 #include <class/cl003e.h> // NV01_MEMORY_SYSTEM
 #include <class/cl0071.h> // NV01_MEMORY_SYSTEM_OS_DESCRIPTOR
 
+
+#define KERN_SOH	"\001"		/* ASCII Start Of Header */
+#define KERN_SOH_ASCII	'\001'
+
+#define KERN_EMERG	KERN_SOH "0"	/* system is unusable */
+#define KERN_ALERT	KERN_SOH "1"	/* action must be taken immediately */
+#define KERN_CRIT	KERN_SOH "2"	/* critical conditions */
+#define KERN_ERR	KERN_SOH "3"	/* error conditions */
+#define KERN_WARNING	KERN_SOH "4"	/* warning conditions */
+#define KERN_NOTICE	KERN_SOH "5"	/* normal but significant condition */
+#define KERN_INFO	KERN_SOH "6"	/* informational */
+#define KERN_DEBUG	KERN_SOH "7"	/* debug-level messages */
+
 #define NV_CTL_DEVICE_ONLY(nv)                 \
 {                                              \
     if (((nv)->flags & NV_FLAG_CONTROL) == 0)  \
@@ -247,10 +260,12 @@ NV_STATUS RmIoctl(
     if (secInfo.clientOSInfo == NULL)
         secInfo.clientOSInfo = nvfp;
 
+    out_string(KERN_INFO "RmIoctl, datasize = \n");
     switch (cmd)
     {
         case NV_ESC_RM_ALLOC_MEMORY:
         {
+	    out_string(KERN_INFO "IOCTL - alloc memory\n");
             nv_ioctl_nvos02_parameters_with_fd *pApi;
             NVOS02_PARAMETERS *pParms;
 
@@ -265,12 +280,14 @@ NV_STATUS RmIoctl(
                 goto done;
             }
 
-            if (pParms->hClass == NV01_MEMORY_SYSTEM_OS_DESCRIPTOR)
+            if (pParms->hClass == NV01_MEMORY_SYSTEM_OS_DESCRIPTOR) {
+		out_string(KERN_INFO "IOCTL - alloc - mem system os descriptor\n");
                 RmAllocOsDescriptor(pParms, secInfo);
-            else
+            } else
             {
                 NvU32 flags = pParms->flags;
 
+		out_string(KERN_INFO "IOCTL - alloc - other\n");
                 Nv01AllocMemoryWithSecInfo(pParms, secInfo);
 
                 //
@@ -301,6 +318,7 @@ NV_STATUS RmIoctl(
 
         case NV_ESC_RM_ALLOC_OBJECT:
         {
+	    out_string(KERN_INFO "IOCTL - alloc object\n");
             NVOS05_PARAMETERS *pApi = data;
 
             NV_CTL_DEVICE_ONLY(nv);
@@ -317,6 +335,7 @@ NV_STATUS RmIoctl(
 
         case NV_ESC_RM_ALLOC:
         {
+	    out_string(KERN_INFO "IOCTL - rm alloc\n");
             NVOS21_PARAMETERS *pApi = data;
             NVOS64_PARAMETERS *pApiAccess = data;
             NvBool bAccessApi = (dataSize == sizeof(NVOS64_PARAMETERS));
@@ -368,6 +387,7 @@ NV_STATUS RmIoctl(
 
         case NV_ESC_RM_FREE:
         {
+	    out_string(KERN_INFO "IOCTL - rm free\n");
             NVOS00_PARAMETERS *pApi = data;
 
             NV_CTL_DEVICE_ONLY(nv);
@@ -391,6 +411,7 @@ NV_STATUS RmIoctl(
 
         case NV_ESC_RM_VID_HEAP_CONTROL:
         {
+	    out_string(KERN_INFO "IOCTL - heap control\n");
             NVOS32_PARAMETERS *pApi = data;
 
             NV_CTL_DEVICE_ONLY(nv);
@@ -411,6 +432,7 @@ NV_STATUS RmIoctl(
 
         case NV_ESC_RM_I2C_ACCESS:
         {
+	    out_string(KERN_INFO "IOCTL - i2c access\n");
             NVOS_I2C_ACCESS_PARAMS *pApi = data;
 
             NV_ACTUAL_DEVICE_ONLY(nv);
@@ -427,6 +449,7 @@ NV_STATUS RmIoctl(
 
         case NV_ESC_RM_IDLE_CHANNELS:
         {
+	    out_string(KERN_INFO "IOCTL - idle channels\n");
             NVOS30_PARAMETERS *pApi = data;
 
             NV_CTL_DEVICE_ONLY(nv);
@@ -443,6 +466,7 @@ NV_STATUS RmIoctl(
 
         case NV_ESC_RM_MAP_MEMORY:
         {
+	    out_string(KERN_INFO "IOCTL - rm map memory\n");
             nv_ioctl_nvos33_parameters_with_fd *pApi;
             NVOS33_PARAMETERS *pParms;
 
@@ -482,6 +506,7 @@ NV_STATUS RmIoctl(
 
         case NV_ESC_RM_UNMAP_MEMORY:
         {
+	    out_string(KERN_INFO "IOCTL - rm unmap memory\n");
             NVOS34_PARAMETERS *pApi = data;
 
             NV_CTL_DEVICE_ONLY(nv);
@@ -498,6 +523,7 @@ NV_STATUS RmIoctl(
 
         case NV_ESC_RM_ACCESS_REGISTRY:
         {
+	    out_string(KERN_INFO "IOCTL - access registry\n");
             NVOS38_PARAMETERS *pApi = data;
 
             NV_CTL_DEVICE_ONLY(nv);
@@ -524,6 +550,7 @@ NV_STATUS RmIoctl(
 
         case NV_ESC_RM_ALLOC_CONTEXT_DMA2:
         {
+	    out_string(KERN_INFO "IOCTL - alloc context dma2\n");
             NVOS39_PARAMETERS *pApi = data;
 
             NV_CTL_DEVICE_ONLY(nv);
@@ -540,6 +567,7 @@ NV_STATUS RmIoctl(
 
         case NV_ESC_RM_BIND_CONTEXT_DMA:
         {
+	    out_string(KERN_INFO "IOCTL - bind context dma\n");
             NVOS49_PARAMETERS *pApi = data;
 
             NV_CTL_DEVICE_ONLY(nv);
@@ -556,6 +584,7 @@ NV_STATUS RmIoctl(
 
         case NV_ESC_RM_MAP_MEMORY_DMA:
         {
+	    out_string(KERN_INFO "IOCTL - map memory dma\n");
             NVOS46_PARAMETERS *pApi = data;
 
             NV_CTL_DEVICE_ONLY(nv);
@@ -572,6 +601,7 @@ NV_STATUS RmIoctl(
 
         case NV_ESC_RM_UNMAP_MEMORY_DMA:
         {
+	    out_string(KERN_INFO "IOCTL - unmap memory dma\n");
             NVOS47_PARAMETERS *pApi = data;
 
             NV_CTL_DEVICE_ONLY(nv);
@@ -588,6 +618,7 @@ NV_STATUS RmIoctl(
 
         case NV_ESC_RM_DUP_OBJECT:
         {
+	    out_string(KERN_INFO "IOCTL - dup object\n");
             NVOS55_PARAMETERS *pApi = data;
 
             NV_CTL_DEVICE_ONLY(nv);
@@ -604,6 +635,7 @@ NV_STATUS RmIoctl(
 
         case NV_ESC_RM_SHARE:
         {
+	    out_string(KERN_INFO "IOCTL - rm share\n");
             NVOS57_PARAMETERS *pApi = data;
 
             NV_CTL_DEVICE_ONLY(nv);
@@ -621,6 +653,7 @@ NV_STATUS RmIoctl(
         case NV_ESC_ALLOC_OS_EVENT:
         {
             nv_ioctl_alloc_os_event_t *pApi = data;
+	    out_string(KERN_INFO "IOCTL - alloc os event\n");
 
             if (dataSize != sizeof(nv_ioctl_alloc_os_event_t))
             {
@@ -636,6 +669,7 @@ NV_STATUS RmIoctl(
 
         case NV_ESC_FREE_OS_EVENT:
         {
+	    out_string(KERN_INFO "IOCTL - free os event\n");
             nv_ioctl_free_os_event_t *pApi = data;
 
             if (dataSize != sizeof(nv_ioctl_free_os_event_t))
@@ -651,6 +685,7 @@ NV_STATUS RmIoctl(
         case NV_ESC_RM_GET_EVENT_DATA:
         {
             NVOS41_PARAMETERS *pApi = data;
+	    out_string(KERN_INFO "IOCTL - get event data\n");
 
             if (dataSize != sizeof(NVOS41_PARAMETERS))
             {
@@ -668,6 +703,7 @@ NV_STATUS RmIoctl(
         {
             nv_state_t *pNv;
             nv_ioctl_status_code_t *pApi = data;
+	    out_string(KERN_INFO "IOCTL - status code\n");
 
             NV_CTL_DEVICE_ONLY(nv);
 
@@ -697,6 +733,7 @@ NV_STATUS RmIoctl(
             NVOS54_PARAMETERS *pApi = data;
 
             NV_CTL_DEVICE_ONLY(nv);
+	    out_string(KERN_INFO "IOCTL - rm control\n");
 
             if (dataSize != sizeof(NVOS54_PARAMETERS))
             {
@@ -715,6 +752,7 @@ NV_STATUS RmIoctl(
             void *pNewCpuAddress;
 
             NV_CTL_DEVICE_ONLY(nv);
+	    out_string(KERN_INFO "IOCTL - update device mapping info\n");
 
             if (dataSize != sizeof(NVOS56_PARAMETERS))
             {
@@ -739,6 +777,7 @@ NV_STATUS RmIoctl(
             void *priv = NULL;
             nv_file_private_t *ctl_nvfp;
 
+	    out_string(KERN_INFO "IOCTL - register fd\n");
             if (dataSize != sizeof(nv_ioctl_register_fd_t))
             {
                 rmStatus = NV_ERR_INVALID_ARGUMENT;
@@ -816,5 +855,6 @@ NV_STATUS RmIoctl(
     rmStatus = NV_OK;
 done:
 
+    out_string(KERN_INFO "IOCTL DONE\n");
     return rmStatus;
 }
